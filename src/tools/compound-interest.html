@@ -1,0 +1,40 @@
+<!--meta
+{"title": "複利計算機", "description": "計算單筆投入加上每月定期定額，在固定年報酬率下經過幾年後會累積多少錢。", "category": "理財", "order": 20}
+-->
+<div class="panel">
+  <div class="row">
+    <div><label for="init">初始本金（元）</label><input id="init" type="number" inputmode="decimal" value="100000" min="0"></div>
+    <div><label for="monthly">每月投入（元）</label><input id="monthly" type="number" inputmode="decimal" value="5000" min="0"></div>
+  </div>
+  <div class="row">
+    <div><label for="rate">年報酬率（%）</label><input id="rate" type="number" inputmode="decimal" value="5" step="0.1"></div>
+    <div><label for="years">投資年數</label><input id="years" type="number" inputmode="numeric" value="20" min="1" max="80"></div>
+  </div>
+  <div class="result" id="out"></div>
+  <div class="scroll"><table id="tbl"></table></div>
+</div>
+<section class="explain">
+  <h2>怎麼算的？</h2>
+  <p>年報酬率換算成每月複利，每月月底投入一次定額。報酬率只是假設值，真實投資有漲有跌，不保證獲利。</p>
+</section>
+<script>
+function calc() {
+  const init = num("init") || 0, m = num("monthly") || 0, y = Math.round(num("years"));
+  const r = Math.pow(1 + num("rate") / 100, 1 / 12) - 1;
+  const out = document.getElementById("out"), tbl = document.getElementById("tbl");
+  if (!(y > 0) || !Number.isFinite(r)) { out.textContent = "請輸入有效數值"; tbl.innerHTML = ""; return; }
+  let bal = init, rows = "";
+  for (let i = 1; i <= y * 12; i++) {
+    bal = bal * (1 + r) + m;
+    if (i % 12 === 0) {
+      const put = init + m * i;
+      rows += `<tr><td>第 ${i / 12} 年</td><td>${fmt(put)}</td><td>${fmt(bal - put)}</td><td>${fmt(bal)}</td></tr>`;
+    }
+  }
+  const put = init + m * y * 12;
+  out.innerHTML = `<div>${y} 年後累積</div><div class="big">${fmt(bal)} 元</div><dl>
+    <dt>投入本金</dt><dd>${fmt(put)} 元</dd><dt>報酬</dt><dd>${fmt(bal - put)} 元</dd></dl>`;
+  tbl.innerHTML = `<tr><th>年度</th><th>累計投入</th><th>累計報酬</th><th>總資產</th></tr>${rows}`;
+}
+bindAll(calc);
+</script>

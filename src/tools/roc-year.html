@@ -1,0 +1,30 @@
+<!--meta
+{"title": "民國年西元年換算", "description": "民國年與西元年互轉，並顯示生肖與今年的實歲，填表格、算年資都用得到。", "category": "換算", "order": 40}
+-->
+<div class="panel">
+  <div class="row">
+    <div><label for="roc">民國年</label><input id="roc" type="number" inputmode="numeric"></div>
+    <div><label for="ad">西元年</label><input id="ad" type="number" inputmode="numeric"></div>
+  </div>
+  <div class="result" id="out"></div>
+</div>
+<section class="explain">
+  <h2>換算方式</h2>
+  <p>西元年 = 民國年 + 1911。民國元年為西元 1912 年；民國前的年份以「民國前 N 年」表示，等於西元 1912 − N 年。生肖以農曆年為準，1、2 月出生的人請再確認農曆新年日期。</p>
+</section>
+<script>
+const zodiac = "鼠牛虎兔龍蛇馬羊猴雞狗豬";
+const rocEl = document.getElementById("roc"), adEl = document.getElementById("ad");
+function show(ad) {
+  const out = document.getElementById("out");
+  if (!Number.isFinite(ad)) { out.textContent = ""; return; }
+  const roc = ad - 1911, now = new Date().getFullYear();
+  const rocText = roc >= 1 ? `民國 ${roc} 年` : `民國前 ${1 - roc} 年`;
+  out.innerHTML = `<div class="big">${rocText} ＝ 西元 ${ad} 年</div><dl>
+    <dt>生肖</dt><dd>${zodiac[((ad - 4) % 12 + 12) % 12]}</dd>
+    <dt>距今（${now} 年）</dt><dd>${now - ad} 年</dd></dl>`;
+}
+rocEl.addEventListener("input", () => { const v = parseInt(rocEl.value); adEl.value = Number.isFinite(v) ? v + 1911 : ""; show(v + 1911); });
+adEl.addEventListener("input", () => { const v = parseInt(adEl.value); rocEl.value = Number.isFinite(v) ? v - 1911 : ""; show(v); });
+const y = new Date().getFullYear(); adEl.value = y; rocEl.value = y - 1911; show(y);
+</script>

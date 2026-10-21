@@ -1,0 +1,38 @@
+<!--meta
+{"title": "折扣百分比計算", "description": "幾折是多少錢、打完折省多少、兩個價格差幾 %，購物比價與漲跌幅一次算清楚。", "category": "日常", "order": 60}
+-->
+<div class="panel">
+  <h2 style="margin-top:0">打折後價格</h2>
+  <div class="row">
+    <div><label for="price">原價（元）</label><input id="price" type="number" inputmode="decimal" value="1280"></div>
+    <div><label for="off">折數（例：85 折填 85，7 折填 7）</label><input id="off" type="number" inputmode="decimal" value="85"></div>
+  </div>
+  <div class="result" id="out1"></div>
+</div>
+<div class="panel">
+  <h2 style="margin-top:0">變化百分比</h2>
+  <div class="row">
+    <div><label for="a">原本數值</label><input id="a" type="number" inputmode="decimal" value="80"></div>
+    <div><label for="b">新數值</label><input id="b" type="number" inputmode="decimal" value="100"></div>
+  </div>
+  <div class="result" id="out2"></div>
+</div>
+<section class="explain">
+  <h2>台灣折數怎麼看？</h2>
+  <p>台灣的「8 折」是付 80%，「85 折」是付 85%，和英文的 20% off、15% off 意思相同。單一位數（如 7）會當作 7 折＝70%。</p>
+</section>
+<script>
+function calc() {
+  const p = num("price"), raw = num("off");
+  const ratio = raw >= 10 ? raw / 100 : raw / 10;
+  const o1 = document.getElementById("out1");
+  o1.innerHTML = p >= 0 && ratio > 0 && ratio <= 1
+    ? `<div class="big">${fmt(p * ratio, 2).replace(/\.00$/, "")} 元</div><dl><dt>省下</dt><dd>${fmt(p * (1 - ratio), 2).replace(/\.00$/, "")} 元</dd><dt>相當於</dt><dd>${fmt((1 - ratio) * 100, 1)}% off</dd></dl>`
+    : "請輸入有效的原價與折數";
+  const a = num("a"), b = num("b"), o2 = document.getElementById("out2");
+  o2.innerHTML = Number.isFinite(a) && Number.isFinite(b) && a !== 0
+    ? `<div class="big">${b >= a ? "增加" : "減少"} ${fmt(Math.abs((b - a) / a * 100), 2)}%</div><dl><dt>差額</dt><dd>${fmt(b - a, 2)}</dd><dt>新值是原值的</dt><dd>${fmt(b / a * 100, 2)}%</dd></dl>`
+    : "原本數值不能是 0";
+}
+bindAll(calc);
+</script>

@@ -1,0 +1,47 @@
+<!--meta
+{"title": "日期天數計算", "description": "計算兩個日期相差幾天、幾週、幾個月，或從某天往前往後推算 N 天是哪一天。", "category": "日期時間", "order": 50}
+-->
+<div class="panel">
+  <h2 style="margin-top:0">兩個日期相差幾天</h2>
+  <div class="row">
+    <div><label for="d1">開始日期</label><input id="d1" type="date"></div>
+    <div><label for="d2">結束日期</label><input id="d2" type="date"></div>
+  </div>
+  <div class="result" id="out1"></div>
+</div>
+<div class="panel">
+  <h2 style="margin-top:0">往後（或往前）推算</h2>
+  <div class="row">
+    <div><label for="base">起始日期</label><input id="base" type="date"></div>
+    <div><label for="add">加幾天（負數往前）</label><input id="add" type="number" inputmode="numeric" value="100"></div>
+  </div>
+  <div class="result" id="out2"></div>
+</div>
+<section class="explain">
+  <h2>說明</h2>
+  <p>相差天數不含開始當天；如果要「含頭含尾」（例如請假天數），請自行加 1 天。月數以日曆月計算。</p>
+</section>
+<script>
+const DAY = 86400000, wk = "日一二三四五六";
+const parse = (id) => { const v = document.getElementById(id).value; return v ? new Date(v + "T00:00:00") : null; };
+const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+function calc() {
+  const a = parse("d1"), b = parse("d2"), o1 = document.getElementById("out1");
+  if (a && b) {
+    const days = Math.round((b - a) / DAY);
+    let months = (b.getFullYear() - a.getFullYear()) * 12 + b.getMonth() - a.getMonth();
+    if (b.getDate() < a.getDate()) months--;
+    o1.innerHTML = `<div class="big">${fmt(days)} 天</div><dl><dt>約</dt><dd>${fmt(Math.trunc(days / 7))} 週 ${Math.abs(days % 7)} 天</dd>
+      <dt>完整月數</dt><dd>${fmt(months)} 個月</dd><dt>含頭含尾</dt><dd>${fmt(days + Math.sign(days || 1))} 天</dd></dl>`;
+  } else o1.textContent = "請選擇兩個日期";
+  const base = parse("base"), n = parseInt(document.getElementById("add").value), o2 = document.getElementById("out2");
+  if (base && Number.isFinite(n)) {
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + n);
+    o2.innerHTML = `<div class="big">${iso(d)}（星期${wk[d.getDay()]}）</div>`;
+  } else o2.textContent = "請選擇日期並輸入天數";
+}
+const today = iso(new Date());
+document.getElementById("d1").value = today; document.getElementById("base").value = today;
+document.getElementById("d2").value = `${new Date().getFullYear()}-12-31`;
+bindAll(calc);
+</script>

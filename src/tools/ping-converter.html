@@ -1,0 +1,26 @@
+<!--meta
+{"title": "坪數換算", "description": "坪、平方公尺、平方英尺、公頃互相換算，看房、裝潢、算租金時快速轉換。", "category": "換算", "order": 30}
+-->
+<div class="panel">
+  <label for="ping">坪</label><input id="ping" type="number" inputmode="decimal" value="30">
+  <label for="sqm">平方公尺（m²）</label><input id="sqm" type="number" inputmode="decimal">
+  <label for="sqft">平方英尺（ft²）</label><input id="sqft" type="number" inputmode="decimal">
+  <label for="ha">公頃</label><input id="ha" type="number" inputmode="decimal">
+</div>
+<section class="explain">
+  <h2>換算基準</h2>
+  <p>1 坪 = 400/121 平方公尺 ≈ 3.3058 m²；1 平方公尺 ≈ 0.3025 坪；1 平方英尺 = 0.09290304 m²；1 公頃 = 10,000 m²。在任一欄輸入，其他欄會自動換算。</p>
+</section>
+<script>
+const toSqm = { ping: 400 / 121, sqm: 1, sqft: 0.09290304, ha: 10000 };
+const ids = Object.keys(toSqm);
+function from(src) {
+  const v = parseFloat(document.getElementById(src).value);
+  ids.forEach((id) => {
+    if (id === src) return;
+    document.getElementById(id).value = Number.isFinite(v) ? +(v * toSqm[src] / toSqm[id]).toPrecision(8) : "";
+  });
+}
+ids.forEach((id) => document.getElementById(id).addEventListener("input", () => from(id)));
+from("ping");
+</script>

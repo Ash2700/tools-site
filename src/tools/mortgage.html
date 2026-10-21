@@ -1,0 +1,44 @@
+<!--meta
+{"title": "房貸試算", "description": "輸入貸款金額、年利率、年限與寬限期，算出每月還款、總利息與逐月攤還表（本息平均攤還）。", "category": "理財", "order": 10}
+-->
+<div class="panel">
+  <div class="row">
+    <div><label for="amt">貸款金額（萬元）</label><input id="amt" type="number" inputmode="decimal" value="1000" min="0"></div>
+    <div><label for="rate">年利率（%）</label><input id="rate" type="number" inputmode="decimal" value="2.185" step="0.001" min="0"></div>
+  </div>
+  <div class="row">
+    <div><label for="years">貸款年限（年）</label><input id="years" type="number" inputmode="numeric" value="30" min="1" max="50"></div>
+    <div><label for="grace">寬限期（年，只繳利息）</label><input id="grace" type="number" inputmode="numeric" value="0" min="0" max="10"></div>
+  </div>
+  <div class="result" id="out"></div>
+  <div class="scroll"><table id="tbl"></table></div>
+</div>
+<section class="explain">
+  <h2>怎麼算的？</h2>
+  <p>採用台灣銀行最常見的「本息平均攤還」：寬限期內每月只繳利息，寬限期結束後，把剩下的年數用固定月付金攤還本金與利息。月付金公式為 本金 × r ×(1+r)<sup>n</sup> ÷ ((1+r)<sup>n</sup> − 1)，r 為月利率、n 為攤還月數。</p>
+  <p>實際利率會隨央行調整與銀行條件變動，貸款前請以銀行核貸條件為準。</p>
+</section>
+<script>
+function calc() {
+  const P = num("amt") * 10000, r = num("rate") / 100 / 12;
+  const N = Math.round(num("years") * 12), G = Math.min(Math.round(num("grace") * 12), N - 1);
+  const out = document.getElementById("out"), tbl = document.getElementById("tbl");
+  if (!(P > 0) || !(N > 0) || !(r >= 0) || G < 0) { out.textContent = "請輸入有效數值"; tbl.innerHTML = ""; return; }
+  const n = N - G;
+  const pay = r === 0 ? P / n : P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  let bal = P, totalInt = 0, rows = "";
+  for (let m = 1; m <= N; m++) {
+    const interest = bal * r;
+    const p = m <= G ? interest : pay;
+    const principal = p - interest;
+    bal = Math.max(bal - principal, 0);
+    totalInt += interest;
+    rows += `<tr><td>${m}</td><td>${fmt(p)}</td><td>${fmt(principal)}</td><td>${fmt(interest)}</td><td>${fmt(bal)}</td></tr>`;
+  }
+  out.innerHTML = `<div>寬限期後每月還款</div><div class="big">${fmt(pay)} 元</div><dl>
+    ${G ? `<dt>寬限期每月（只付利息）</dt><dd>${fmt(P * r)} 元</dd>` : ""}
+    <dt>總利息</dt><dd>${fmt(totalInt)} 元</dd><dt>本息合計</dt><dd>${fmt(P + totalInt)} 元</dd></dl>`;
+  tbl.innerHTML = `<tr><th>期數</th><th>月付</th><th>本金</th><th>利息</th><th>剩餘本金</th></tr>${rows}`;
+}
+bindAll(calc);
+</script>
