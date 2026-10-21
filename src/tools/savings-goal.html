@@ -1,0 +1,32 @@
+<!--meta
+{"title": "存錢目標計算", "description": "想在幾年內存到一筆錢？輸入目標金額、期限、現有存款與預期年報酬率，算出每月需要存多少。", "category": "理財", "order": 25}
+-->
+<div class="panel">
+  <div class="row">
+    <div><label for="goal">目標金額（元）</label><input id="goal" type="number" inputmode="decimal" value="1000000"></div>
+    <div><label for="years">幾年內達成</label><input id="years" type="number" inputmode="decimal" value="5" min="0.1"></div>
+  </div>
+  <div class="row">
+    <div><label for="have">現有存款（元）</label><input id="have" type="number" inputmode="decimal" value="100000"></div>
+    <div><label for="rate">預期年報酬率（%）</label><input id="rate" type="number" inputmode="decimal" value="1.5" step="0.1"></div>
+  </div>
+  <div class="result" id="out"></div>
+</div>
+<section class="explain">
+  <h2>怎麼算的？</h2>
+  <p>先算出現有存款到期時會成長到多少，再用年金公式算出每月月底需存入的金額，才能補足差額。只放活存或定存，報酬率可填 1–1.7% 左右；投資的報酬率只是假設，不保證。</p>
+</section>
+<script>
+function calc() {
+  const g = num("goal"), y = num("years"), h = num("have") || 0, out = document.getElementById("out");
+  const r = Math.pow(1 + (num("rate") || 0) / 100, 1 / 12) - 1, n = Math.round(y * 12);
+  if (!(g > 0 && n > 0)) { out.textContent = "請輸入有效數值"; return; }
+  const fvHave = h * Math.pow(1 + r, n), gap = g - fvHave;
+  if (gap <= 0) { out.innerHTML = `<div class="big">不用再存了 🎉</div><dl><dt>現有存款到期約</dt><dd>${fmt(fvHave)} 元</dd></dl>`; return; }
+  const m = r === 0 ? gap / n : gap * r / (Math.pow(1 + r, n) - 1);
+  out.innerHTML = `<div>每月需存</div><div class="big">${fmt(Math.ceil(m))} 元</div><dl>
+    <dt>每天約</dt><dd>${fmt(m * 12 / 365)} 元</dd><dt>總共存入</dt><dd>${fmt(m * n)} 元</dd>
+    <dt>現有存款到期約</dt><dd>${fmt(fvHave)} 元</dd><dt>利息／報酬貢獻</dt><dd>${fmt(g - h - m * n)} 元</dd></dl>`;
+}
+bindAll(calc);
+</script>

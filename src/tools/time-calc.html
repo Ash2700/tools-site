@@ -1,0 +1,44 @@
+<!--meta
+{"title": "工時與時間計算", "description": "輸入上下班時間與休息時間，算出實際工作時數；也能把多段時間加總成總時數與分鐘。", "category": "日期時間", "order": 58}
+-->
+<div class="panel">
+  <h2 style="margin-top:0">單日工時</h2>
+  <div class="row">
+    <div><label for="start">上班時間</label><input id="start" type="time" value="09:00"></div>
+    <div><label for="end">下班時間</label><input id="end" type="time" value="18:00"></div>
+  </div>
+  <label for="brk">休息時間（分鐘）</label><input id="brk" type="number" inputmode="numeric" value="60">
+  <div class="result" id="out1"></div>
+</div>
+<div class="panel">
+  <h2 style="margin-top:0">多段時間加總</h2>
+  <label for="list">每行一段，格式 時:分（例如 1:30）</label>
+  <textarea id="list" rows="5" style="width:100%;font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg)">1:30
+2:45
+0:50</textarea>
+  <div class="result" id="out2"></div>
+</div>
+<section class="explain">
+  <h2>說明</h2>
+  <p>下班時間早於上班時間時，會當作跨夜班計算。工時只扣除你填的休息時間，加班費與法定工時規定請以勞動部公告為準。</p>
+</section>
+<script>
+const mins = (v) => { const [h, m] = v.split(":").map(Number); return h * 60 + m; };
+const hm = (t) => `${Math.floor(t / 60)} 小時 ${t % 60} 分`;
+function calc() {
+  const s = document.getElementById("start").value, e = document.getElementById("end").value, o1 = document.getElementById("out1");
+  if (s && e) {
+    let t = mins(e) - mins(s); if (t < 0) t += 1440;
+    t = Math.max(t - (num("brk") || 0), 0);
+    o1.innerHTML = `<div class="big">${hm(t)}</div><dl><dt>以小時計</dt><dd>${fmt(t / 60, 2)} 小時</dd><dt>每週 5 天</dt><dd>${fmt(t * 5 / 60, 1)} 小時</dd></dl>`;
+  } else o1.textContent = "請填上下班時間";
+  let total = 0, bad = 0;
+  document.getElementById("list").value.split("\n").map((l) => l.trim()).filter(Boolean).forEach((l) => {
+    const m = l.match(/^(\d+)(?::(\d{1,2}))?$/);
+    if (m) total += parseInt(m[1]) * 60 + parseInt(m[2] || 0); else bad++;
+  });
+  document.getElementById("out2").innerHTML = `<div class="big">${hm(total)}</div><dl><dt>總分鐘</dt><dd>${fmt(total)} 分</dd><dt>以小時計</dt><dd>${fmt(total / 60, 2)} 小時</dd>${bad ? `<dt>無法辨識</dt><dd>${bad} 行</dd>` : ""}</dl>`;
+}
+document.getElementById("list").addEventListener("input", calc);
+bindAll(calc);
+</script>

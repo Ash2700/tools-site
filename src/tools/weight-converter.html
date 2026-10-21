@@ -1,0 +1,27 @@
+<!--meta
+{"title": "台斤公斤換算", "description": "台斤、公斤、公克、兩、磅、盎司互相換算，市場買菜、看食譜、寄包裹都好用。", "category": "換算", "order": 35}
+-->
+<div class="panel">
+  <label for="jin">台斤</label><input id="jin" type="number" inputmode="decimal" value="1">
+  <label for="liang">台兩</label><input id="liang" type="number" inputmode="decimal">
+  <label for="kg">公斤（kg）</label><input id="kg" type="number" inputmode="decimal">
+  <label for="g">公克（g）</label><input id="g" type="number" inputmode="decimal">
+  <label for="lb">磅（lb）</label><input id="lb" type="number" inputmode="decimal">
+  <label for="oz">盎司（oz）</label><input id="oz" type="number" inputmode="decimal">
+</div>
+<section class="explain">
+  <h2>換算基準</h2>
+  <p>1 台斤 ＝ 600 公克 ＝ 16 台兩；1 台兩 ＝ 37.5 公克；1 磅 ＝ 453.59237 公克；1 盎司 ＝ 28.349523 公克。在任一欄輸入，其他欄會自動換算。</p>
+</section>
+<script>
+const toG = { jin: 600, liang: 37.5, kg: 1000, g: 1, lb: 453.59237, oz: 28.349523125 };
+const ids = Object.keys(toG);
+function from(src) {
+  const v = parseFloat(document.getElementById(src).value);
+  ids.forEach((id) => {
+    if (id !== src) document.getElementById(id).value = Number.isFinite(v) ? +(v * toG[src] / toG[id]).toPrecision(8) : "";
+  });
+}
+ids.forEach((id) => document.getElementById(id).addEventListener("input", () => from(id)));
+from("jin");
+</script>

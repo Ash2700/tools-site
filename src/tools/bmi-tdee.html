@@ -1,0 +1,41 @@
+<!--meta
+{"title": "BMI 與 TDEE 計算", "description": "輸入身高、體重、年齡與活動量，算出 BMI、基礎代謝率 BMR 與每日總消耗熱量 TDEE。", "category": "健康", "order": 70}
+-->
+<div class="panel">
+  <div class="row">
+    <div><label for="h">身高（公分）</label><input id="h" type="number" inputmode="decimal" value="170"></div>
+    <div><label for="w">體重（公斤）</label><input id="w" type="number" inputmode="decimal" value="65"></div>
+  </div>
+  <div class="row">
+    <div><label for="age">年齡</label><input id="age" type="number" inputmode="numeric" value="30"></div>
+    <div><label for="sex">生理性別</label><select id="sex"><option value="m">男</option><option value="f">女</option></select></div>
+  </div>
+  <label for="act">活動量</label>
+  <select id="act">
+    <option value="1.2">久坐（幾乎不運動）</option>
+    <option value="1.375" selected>輕度（每週運動 1–3 天）</option>
+    <option value="1.55">中度（每週運動 3–5 天）</option>
+    <option value="1.725">高度（每週運動 6–7 天）</option>
+    <option value="1.9">非常高（勞力工作或一天練兩次）</option>
+  </select>
+  <div class="result" id="out"></div>
+</div>
+<section class="explain">
+  <h2>怎麼算的？</h2>
+  <p>BMI ＝ 體重(kg) ÷ 身高(m)²，分級採衛福部國健署標準：未滿 18.5 過輕、18.5–24 正常、24–27 過重、27 以上肥胖。BMR 使用 Mifflin-St Jeor 公式，TDEE ＝ BMR × 活動係數。</p>
+  <p>這些都是估算值，不適用孕婦、成長中的兒童與青少年。若有健康疑慮請諮詢醫師或營養師。</p>
+</section>
+<script>
+function calc() {
+  const h = num("h"), w = num("w"), age = num("age"), out = document.getElementById("out");
+  if (!(h > 0 && w > 0 && age > 0)) { out.textContent = "請輸入有效數值"; return; }
+  const bmi = w / (h / 100) ** 2;
+  const level = bmi < 18.5 ? "過輕" : bmi < 24 ? "正常範圍" : bmi < 27 ? "過重" : "肥胖";
+  const bmr = 10 * w + 6.25 * h - 5 * age + (document.getElementById("sex").value === "m" ? 5 : -161);
+  const tdee = bmr * parseFloat(document.getElementById("act").value);
+  out.innerHTML = `<div>BMI</div><div class="big">${fmt(bmi, 1)}（${level}）</div><dl>
+    <dt>正常體重範圍</dt><dd>${fmt(18.5 * (h / 100) ** 2, 1)}–${fmt(24 * (h / 100) ** 2, 1)} kg</dd>
+    <dt>基礎代謝 BMR</dt><dd>${fmt(bmr)} 大卡</dd><dt>每日總消耗 TDEE</dt><dd>${fmt(tdee)} 大卡</dd></dl>`;
+}
+bindAll(calc);
+</script>

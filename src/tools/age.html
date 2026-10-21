@@ -1,0 +1,34 @@
+<!--meta
+{"title": "年齡計算（實歲虛歲）", "description": "輸入生日，算出今天的實歲、虛歲、精確到天的年齡，以及距離下次生日還有幾天。", "category": "日期時間", "order": 55}
+-->
+<div class="panel">
+  <div class="row">
+    <div><label for="birth">出生日期</label><input id="birth" type="date" value="1990-06-15"></div>
+    <div><label for="on">計算到哪一天</label><input id="on" type="date"></div>
+  </div>
+  <div class="result" id="out"></div>
+</div>
+<section class="explain">
+  <h2>實歲和虛歲差在哪？</h2>
+  <p>實歲（足歲）是從出生日起算，每過一次生日加一歲，法律文件多用這個。虛歲是傳統算法，出生就算 1 歲，之後每過一次農曆新年加一歲；這裡以「實歲＋1、未過生日再＋1」的常見簡化方式估算，與農曆實際算法可能差一歲。</p>
+</section>
+<script>
+const parse = (id) => { const v = document.getElementById(id).value; return v ? new Date(v + "T00:00:00") : null; };
+function calc() {
+  const b = parse("birth"), t = parse("on"), out = document.getElementById("out");
+  if (!b || !t || t < b) { out.textContent = "請選擇有效日期（計算日不能早於生日）"; return; }
+  let y = t.getFullYear() - b.getFullYear(), m = t.getMonth() - b.getMonth(), d = t.getDate() - b.getDate();
+  if (d < 0) { m--; d += new Date(t.getFullYear(), t.getMonth(), 0).getDate(); }
+  if (m < 0) { y--; m += 12; }
+  const hadBirthday = t.getMonth() > b.getMonth() || (t.getMonth() === b.getMonth() && t.getDate() >= b.getDate());
+  let next = new Date(t.getFullYear(), b.getMonth(), b.getDate());
+  if (next < t) next = new Date(t.getFullYear() + 1, b.getMonth(), b.getDate());
+  const days = Math.round((t - b) / 86400000), toNext = Math.round((next - t) / 86400000);
+  out.innerHTML = `<div>實歲</div><div class="big">${y} 歲</div><dl>
+    <dt>精確年齡</dt><dd>${y} 歲 ${m} 個月 ${d} 天</dd><dt>虛歲（估）</dt><dd>${y + (hadBirthday ? 1 : 2)} 歲</dd>
+    <dt>已活了</dt><dd>${fmt(days)} 天</dd><dt>下次生日</dt><dd>${toNext === 0 ? "就是今天 🎂" : `還有 ${toNext} 天`}</dd></dl>`;
+}
+const n = new Date();
+document.getElementById("on").value = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
+bindAll(calc);
+</script>
