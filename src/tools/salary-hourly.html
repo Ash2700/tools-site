@@ -1,0 +1,37 @@
+<!--meta
+{"title": "薪資時薪換算（月薪↔時薪↔年薪）", "description": "月薪、時薪、日薪、年薪互相換算，依勞動部「月薪 ÷ 30 ÷ 8」計算平日每小時工資，也可加入年終獎金月數算年薪。", "category": "理財", "order": 28}
+-->
+<div class="panel">
+  <div class="row">
+    <div><label for="type">我知道的是</label><select id="type"><option value="m" selected>月薪</option><option value="h">時薪</option><option value="d">日薪</option><option value="y">年薪（含年終）</option></select></div>
+    <div><label for="amt">金額（元）</label><input id="amt" type="number" inputmode="decimal" value="36000"></div>
+  </div>
+  <div class="row">
+    <div><label for="bonus">年終獎金（幾個月）</label><input id="bonus" type="number" inputmode="decimal" value="1"></div>
+    <div><label for="wk">每週實際工時（小時）</label><input id="wk" type="number" inputmode="decimal" value="40"></div>
+  </div>
+  <div class="result" id="out"></div>
+</div>
+<section class="explain">
+  <h2>換算依據</h2>
+  <p><strong>法定時薪（月薪 ÷ 240）</strong>：依勞動部對月薪制勞工的解釋，平日每小時工資 ＝ 月薪 ÷ 30 ÷ 8，也就是月薪除以 240。計算加班費、請假扣薪時通常用這個數字。例如月薪 36,000 元 → 時薪 150 元。</p>
+  <p><strong>日薪</strong> ＝ 月薪 ÷ 30。</p>
+  <p><strong>實際工時時薪</strong>：一年 52 週，每月平均工時 ＝ 每週工時 × 52 ÷ 12（每週 40 小時約 173.3 小時）。月薪 ÷ 每月平均工時，代表你實際每工作一小時賺多少，會比法定時薪高。</p>
+  <p><strong>年薪</strong> ＝ 月薪 ×（12 ＋ 年終月數）。從時薪或日薪反推月薪時，分別乘以 240 與 30。</p>
+  <p>以上為稅前金額，未扣除勞健保、勞退自提與所得稅。</p>
+</section>
+<script>
+function calc() {
+  const t = document.getElementById("type").value, a = num("amt"), b = num("bonus") || 0, w = num("wk");
+  const out = document.getElementById("out");
+  if (!(a > 0) || b < 0) { out.textContent = "請輸入有效的金額與年終月數"; return; }
+  const m = t === "m" ? a : t === "h" ? a * 240 : t === "d" ? a * 30 : a / (12 + b);
+  const mh = w > 0 ? w * 52 / 12 : NaN;
+  out.innerHTML = `<div>月薪</div><div class="big">${fmt(m)} 元</div><dl>
+    <dt>法定時薪（÷240）</dt><dd>${fmt(m / 240, 2)} 元</dd>
+    <dt>日薪（÷30）</dt><dd>${fmt(m / 30, 1)} 元</dd>
+    <dt>年薪（${fmt(12 + b, 1)} 個月）</dt><dd>${fmt(m * (12 + b))} 元</dd>
+    <dt>實際工時時薪</dt><dd>${w > 0 ? fmt(m / mh, 2) + " 元（每月約 " + fmt(mh, 1) + " 小時）" : "—"}</dd></dl>`;
+}
+bindAll(calc);
+</script>

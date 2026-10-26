@@ -1,0 +1,62 @@
+<!--meta
+{"title": "油耗與油錢計算", "description": "輸入里程、油耗（公里/公升）與油價，算出這趟要花多少油錢、每月油錢，也能用加滿法算出實際油耗。", "category": "日常", "order": 62}
+-->
+<div class="panel">
+  <h2 style="margin-top:0">這趟要多少油錢</h2>
+  <div class="row">
+    <div><label for="km">行駛里程（公里）</label><input id="km" type="number" inputmode="decimal" value="350"></div>
+    <div><label for="kmpl">油耗（公里/公升）</label><input id="kmpl" type="number" inputmode="decimal" value="14"></div>
+  </div>
+  <div class="row">
+    <div><label for="price">油價（元/公升）</label><input id="price" type="number" inputmode="decimal" value="30"></div>
+    <div><label for="people">分攤人數</label><input id="people" type="number" inputmode="numeric" value="1" min="1"></div>
+  </div>
+  <div class="result" id="out1"></div>
+</div>
+<div class="panel">
+  <h2 style="margin-top:0">每月通勤油錢</h2>
+  <div class="row">
+    <div><label for="daily">每天來回（公里）</label><input id="daily" type="number" inputmode="decimal" value="30"></div>
+    <div><label for="days">每月開車天數</label><input id="days" type="number" inputmode="numeric" value="22"></div>
+  </div>
+  <div class="result" id="out2"></div>
+</div>
+<div class="panel">
+  <h2 style="margin-top:0">加滿法算實際油耗</h2>
+  <div class="row">
+    <div><label for="dist">兩次加滿之間行駛（公里）</label><input id="dist" type="number" inputmode="decimal" value="480"></div>
+    <div><label for="liters">第二次加了幾公升</label><input id="liters" type="number" inputmode="decimal" value="36"></div>
+  </div>
+  <div class="result" id="out3"></div>
+</div>
+<section class="explain">
+  <h2>計算公式</h2>
+  <p>耗油量（公升）＝ 里程 ÷ 油耗（公里/公升）；油錢 ＝ 耗油量 × 每公升油價。</p>
+  <p>台灣習慣用「公里/公升」表示油耗，數字越大越省油；歐洲常用「公升/百公里」，換算為 100 ÷（公里/公升）。例如 14 公里/公升 ≈ 7.14 公升/百公里。</p>
+  <p><strong>加滿法</strong>：第一次加滿油並把旅程里程歸零，開一段時間後再加滿，用「行駛公里 ÷ 第二次加的公升數」就是這段路的實際油耗，比車上儀表顯示的更準。</p>
+  <p>油價每週可能調整，請以加油站當週公告的 92／95／98 無鉛汽油或柴油價格為準，本頁預設值僅為範例。</p>
+</section>
+<script>
+function calc() {
+  const km = num("km"), e = num("kmpl"), p = num("price"), n = Math.max(1, Math.round(num("people")) || 1);
+  const o1 = document.getElementById("out1");
+  if (km >= 0 && e > 0 && p >= 0) {
+    const L = km / e, cost = L * p;
+    o1.innerHTML = `<div>油錢約</div><div class="big">${fmt(cost)} 元</div><dl>
+      <dt>耗油量</dt><dd>${fmt(L, 2)} 公升</dd><dt>每公里</dt><dd>${fmt(p / e, 2)} 元</dd>
+      <dt>每人分攤（${n} 人）</dt><dd>${fmt(cost / n)} 元</dd><dt>油耗換算</dt><dd>${fmt(100 / e, 2)} 公升/百公里</dd></dl>`;
+  } else o1.textContent = "請輸入有效的里程、油耗與油價";
+  const d = num("daily"), days = num("days"), o2 = document.getElementById("out2");
+  if (d >= 0 && days >= 0 && e > 0 && p >= 0) {
+    const m = d * days / e * p;
+    o2.innerHTML = `<div>每月油錢約</div><div class="big">${fmt(m)} 元</div><dl>
+      <dt>每月里程</dt><dd>${fmt(d * days)} 公里</dd><dt>每月耗油</dt><dd>${fmt(d * days / e, 1)} 公升</dd>
+      <dt>一年約</dt><dd>${fmt(m * 12)} 元</dd></dl><p style="margin:.5em 0 0">（使用上方的油耗與油價）</p>`;
+  } else o2.textContent = "請輸入有效的里程與天數";
+  const dist = num("dist"), lit = num("liters"), o3 = document.getElementById("out3");
+  o3.innerHTML = dist > 0 && lit > 0
+    ? `<div>實際油耗</div><div class="big">${fmt(dist / lit, 2)} 公里/公升</div><dl><dt>換算</dt><dd>${fmt(lit / dist * 100, 2)} 公升/百公里</dd>${p >= 0 ? `<dt>這段路油錢</dt><dd>${fmt(lit * p)} 元</dd>` : ""}</dl>`
+    : "請輸入有效的里程與公升數";
+}
+bindAll(calc);
+</script>
