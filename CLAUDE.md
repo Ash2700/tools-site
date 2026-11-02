@@ -20,8 +20,6 @@ Live at https://ash2700.github.io/tools-site/ — deployed by `.github/workflows
 - Do not touch `src/static/google*.html` (Search Console verification).
 
 ## Tool backlog (pick from the top, remove when done)
-- 進位制換算（二/八/十/十六進位）
-- 溫度換算（攝氏/華氏）
 - 長度換算（公分/台尺/吋/英尺）
 - 倒數計時天數（距離某節日還有幾天）
 - 預產期計算
@@ -32,3 +30,5 @@ Live at https://ash2700.github.io/tools-site/ — deployed by `.github/workflows
 - 貸款提前還款試算
 - 機車/汽車燃料稅與牌照稅計算（需查證當年度官方稅額表）
 - 每月記帳預算分配（50/30/20 法則）
+- 容量換算（毫升/公升/杯/大匙/小匙/加侖）
+- 羅馬數字轉換（阿拉伯數字↔羅馬數字）

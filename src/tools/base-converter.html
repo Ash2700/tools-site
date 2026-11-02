@@ -1,0 +1,58 @@
+<!--meta
+{"title": "進位制換算", "description": "二進位、八進位、十進位、十六進位互相換算，支援超大整數與負數，寫程式、修資訊課都好用。", "category": "換算", "order": 38}
+-->
+<div class="panel">
+  <label for="b10">十進位（Decimal）</label><input id="b10" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="255">
+  <label for="b2">二進位（Binary）</label><input id="b2" type="text" autocomplete="off" spellcheck="false">
+  <label for="b8">八進位（Octal）</label><input id="b8" type="text" autocomplete="off" spellcheck="false">
+  <label for="b16">十六進位（Hex）</label><input id="b16" type="text" autocomplete="off" spellcheck="false">
+  <div class="result" id="out"></div>
+</div>
+<section class="explain">
+  <h2>進位制怎麼換算？</h2>
+  <p>N 進位的每一位數代表 N 的次方。例如二進位 <code>1011</code> ＝ 1×2³ ＋ 0×2² ＋ 1×2¹ ＋ 1×2⁰ ＝ 11（十進位）。十進位轉其他進位則是不斷除以 N、由下往上取餘數。</p>
+  <p>十六進位用 0–9 加上 A–F（代表 10–15），每 1 位十六進位剛好對應 4 位二進位；八進位每 1 位對應 3 位二進位，所以 255 ＝ 1111 1111₂ ＝ 377₈ ＝ FF₁₆。</p>
+  <p>本工具使用 BigInt 精確計算，不會有小數誤差，可輸入任意長度的整數；可加負號，也接受 0x、0b、0o 前綴與空白、底線分隔。</p>
+</section>
+<script>
+const bases = { b2: 2, b8: 8, b10: 10, b16: 16 };
+const digits = "0123456789abcdefghijklmnopqrstuvwxyz";
+function parse(str, base) {
+  let s = str.trim().toLowerCase().replace(/[\s_]/g, "");
+  let neg = false;
+  if (s.startsWith("-")) { neg = true; s = s.slice(1); }
+  const pre = { 2: "0b", 8: "0o", 16: "0x" }[base];
+  if (pre && s.startsWith(pre)) s = s.slice(2);
+  if (!s) return null;
+  let v = 0n;
+  const B = BigInt(base);
+  for (const ch of s) {
+    const d = digits.indexOf(ch);
+    if (d < 0 || d >= base) return null;
+    v = v * B + BigInt(d);
+  }
+  return neg ? -v : v;
+}
+function group(s, n) {
+  const neg = s.startsWith("-"); if (neg) s = s.slice(1);
+  const out = s.replace(new RegExp(`\\B(?=(\\d{${n}})+(?!\\d))`, "g"), " ");
+  return (neg ? "-" : "") + out;
+}
+function from(src) {
+  const v = parse(document.getElementById(src).value, bases[src]);
+  const out = document.getElementById("out");
+  if (v === null) {
+    out.innerHTML = document.getElementById(src).value.trim() ? "輸入含有此進位不允許的數字" : "請輸入整數";
+    return;
+  }
+  for (const id in bases) if (id !== src) {
+    const s = v.toString(bases[id]);
+    document.getElementById(id).value = id === "b16" ? s.toUpperCase() : s;
+  }
+  const abs = v < 0n ? -v : v;
+  const bin = v.toString(2);
+  out.innerHTML = `<div class="big">${group(v.toString(10), 3).replace(/ /g, ",")}</div><dl><dt>二進位（每 4 位分組）</dt><dd style="word-break:break-all">${group(bin, 4)}</dd><dt>位元數</dt><dd>${abs.toString(2).length} bits</dd></dl>`;
+}
+for (const id in bases) document.getElementById(id).addEventListener("input", () => from(id));
+from("b10");
+</script>

@@ -1,0 +1,43 @@
+<!--meta
+{"title": "溫度換算（攝氏／華氏）", "description": "攝氏、華氏、絕對溫度（K）互相換算，出國看天氣、烤箱食譜、量體溫都能快速對照。", "category": "換算", "order": 36}
+-->
+<div class="panel">
+  <label for="c">攝氏（°C）</label><input id="c" type="number" inputmode="decimal" value="37">
+  <label for="f">華氏（°F）</label><input id="f" type="number" inputmode="decimal">
+  <label for="k">絕對溫度（K）</label><input id="k" type="number" inputmode="decimal">
+  <div class="result" id="out"></div>
+</div>
+<div class="panel">
+  <h2 style="margin-top:0">常用溫度對照</h2>
+  <dl>
+    <dt>水的冰點</dt><dd>0°C ＝ 32°F</dd>
+    <dt>舒適室溫</dt><dd>25°C ＝ 77°F</dd>
+    <dt>正常體溫</dt><dd>37°C ＝ 98.6°F</dd>
+    <dt>發燒（耳溫）</dt><dd>38°C ＝ 100.4°F</dd>
+    <dt>水的沸點</dt><dd>100°C ＝ 212°F</dd>
+    <dt>烤箱常用溫度</dt><dd>180°C ＝ 356°F；350°F ≈ 177°C</dd>
+  </dl>
+</div>
+<section class="explain">
+  <h2>換算公式</h2>
+  <p>華氏 ＝ 攝氏 × 9 ÷ 5 ＋ 32；攝氏 ＝（華氏 − 32）× 5 ÷ 9。</p>
+  <p>絕對溫度 K ＝ 攝氏 ＋ 273.15，0 K（−273.15°C）為絕對零度，不會有負的 K 值。</p>
+  <p>心算小技巧：攝氏 × 2 ＋ 30 可粗估華氏（20°C ≈ 70°F），在 0–30°C 範圍誤差約 2°F 以內。</p>
+</section>
+<script>
+const toC = { c: (v) => v, f: (v) => (v - 32) * 5 / 9, k: (v) => v - 273.15 };
+const fromC = { c: (v) => v, f: (v) => v * 9 / 5 + 32, k: (v) => v + 273.15 };
+const r = (x) => +x.toFixed(2);
+function from(src) {
+  const v = parseFloat(document.getElementById(src).value);
+  const out = document.getElementById("out");
+  if (!Number.isFinite(v)) { ["c", "f", "k"].forEach((id) => id !== src && (document.getElementById(id).value = "")); out.innerHTML = "請輸入溫度"; return; }
+  const c = toC[src](v);
+  ["c", "f", "k"].forEach((id) => { if (id !== src) document.getElementById(id).value = r(fromC[id](c)); });
+  out.innerHTML = c < -273.15
+    ? "低於絕對零度（−273.15°C），物理上不存在"
+    : `<div class="big">${r(c).toLocaleString("zh-TW")}°C ＝ ${r(fromC.f(c)).toLocaleString("zh-TW")}°F</div>`;
+}
+["c", "f", "k"].forEach((id) => document.getElementById(id).addEventListener("input", () => from(id)));
+from("c");
+</script>
