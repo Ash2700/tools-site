@@ -20,8 +20,6 @@ Live at https://ash2700.github.io/tools-site/ — deployed by `.github/workflows
 - Do not touch `src/static/google*.html` (Search Console verification).
 
 ## Tool backlog (pick from the top, remove when done)
-- 長度換算（公分/台尺/吋/英尺）
-- 倒數計時天數（距離某節日還有幾天）
 - 預產期計算
 - 利率換算（年利率↔月利率↔日利率）
 - 隨機抽籤／分組工具
@@ -32,3 +30,5 @@ Live at https://ash2700.github.io/tools-site/ — deployed by `.github/workflows
 - 每月記帳預算分配（50/30/20 法則）
 - 容量換算（毫升/公升/杯/大匙/小匙/加侖）
 - 羅馬數字轉換（阿拉伯數字↔羅馬數字）
+- 速度換算（公里/時、英里/時、公尺/秒、節）
+- 鞋子尺碼換算（台灣/日本公分、美國、歐洲尺碼對照）

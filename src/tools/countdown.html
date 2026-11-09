@@ -1,0 +1,81 @@
+<!--meta
+{"title": "節日倒數計時（距離還有幾天）", "description": "距離春節、端午、中秋、國慶、聖誕節、跨年還有幾天？一次列出台灣常見節日倒數天數，也能自訂日期倒數考試、生日、旅行。", "category": "日期時間", "order": 52}
+-->
+<div class="panel">
+  <h2 style="margin-top:0">自訂倒數</h2>
+  <div class="row">
+    <div><label for="name">事件名稱</label><input id="name" type="text" value="我的重要日子"></div>
+    <div><label for="target">目標日期</label><input id="target" type="date"></div>
+  </div>
+  <div class="result" id="out"></div>
+</div>
+<div class="panel">
+  <h2 style="margin-top:0">台灣常見節日倒數</h2>
+  <p id="today" style="margin-top:0"></p>
+  <table>
+    <thead><tr><th>節日</th><th>日期</th><th>還有</th></tr></thead>
+    <tbody id="list"></tbody>
+  </table>
+</div>
+<section class="explain">
+  <h2>計算方式</h2>
+  <p>倒數天數 ＝ 目標日期 − 今天日期（以你裝置的日期為準，不含今天）。例如今天是 12 月 24 日，距離聖誕節（12 月 25 日）就是「還有 1 天」；當天則顯示「就是今天」。</p>
+  <p>國曆節日每年日期固定：元旦 1/1、情人節 2/14、和平紀念日 2/28、兒童節 4/4、勞動節 5/1、父親節 8/8、教師節 9/28、國慶日 10/10、聖誕節 12/25；母親節為每年 5 月的第二個星期日。</p>
+  <p>農曆節日（除夕、春節、元宵、端午、中秋）每年對應的國曆日期不同，本頁內建 2026～2030 年的對照表（春節：2027/2/6、2028/1/26、2029/2/13、2030/2/3；中秋：2026/9/25、2027/9/15、2028/10/3、2029/9/22、2030/9/12），除夕為春節前一天、元宵為正月十五。本頁只計算日期，實際放假與補假安排請以行政院人事行政總處公布的行事曆為準。</p>
+</section>
+<script>
+const DAY = 86400000, wk = "日一二三四五六";
+const ymd = (y, m, d) => new Date(y, m - 1, d);
+const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const parse = (s) => { const [y, m, d] = s.split("-").map(Number); return ymd(y, m, d); };
+// 農曆節日國曆對照（春節＝正月初一、端午＝五月初五、中秋＝八月十五）
+const LUNAR = {
+  2026: { cny: "2026-02-17", duanwu: "2026-06-19", mid: "2026-09-25" },
+  2027: { cny: "2027-02-06", duanwu: "2027-06-09", mid: "2027-09-15" },
+  2028: { cny: "2028-01-26", duanwu: "2028-05-28", mid: "2028-10-03" },
+  2029: { cny: "2029-02-13", duanwu: "2029-06-16", mid: "2029-09-22" },
+  2030: { cny: "2030-02-03", duanwu: "2030-06-05", mid: "2030-09-12" },
+};
+function secondSundayOfMay(y) { const first = ymd(y, 5, 1); return ymd(y, 5, 1 + ((7 - first.getDay()) % 7) + 7); }
+function holidaysOf(y) {
+  const list = [
+    ["元旦", ymd(y, 1, 1)], ["西洋情人節", ymd(y, 2, 14)], ["和平紀念日", ymd(y, 2, 28)], ["兒童節", ymd(y, 4, 4)],
+    ["勞動節", ymd(y, 5, 1)], ["母親節", secondSundayOfMay(y)], ["父親節", ymd(y, 8, 8)], ["教師節", ymd(y, 9, 28)],
+    ["國慶日", ymd(y, 10, 10)], ["聖誕節", ymd(y, 12, 25)], ["跨年夜", ymd(y, 12, 31)],
+  ];
+  const L = LUNAR[y];
+  if (L) {
+    const cny = parse(L.cny);
+    list.push(["除夕", new Date(cny.getFullYear(), cny.getMonth(), cny.getDate() - 1)], ["春節（大年初一）", cny],
+      ["元宵節", new Date(cny.getFullYear(), cny.getMonth(), cny.getDate() + 14)], ["端午節", parse(L.duanwu)], ["中秋節", parse(L.mid)]);
+  }
+  return list;
+}
+function todayDate() { const n = new Date(); return ymd(n.getFullYear(), n.getMonth() + 1, n.getDate()); }
+const diffDays = (a, b) => Math.round((b - a) / DAY);
+function renderList() {
+  const t = todayDate(), y = t.getFullYear(), next = {};
+  [y, y + 1].forEach((yy) => holidaysOf(yy).forEach(([n, d]) => { if (d >= t && !next[n]) next[n] = d; }));
+  const rows = Object.entries(next).sort((a, b) => a[1] - b[1]);
+  document.getElementById("today").textContent = `今天是 ${iso(t)}（星期${wk[t.getDay()]}）`;
+  document.getElementById("list").innerHTML = rows.map(([n, d]) => {
+    const k = diffDays(t, d);
+    return `<tr><td>${n}</td><td>${iso(d)}（${wk[d.getDay()]}）</td><td>${k === 0 ? "就是今天" : fmt(k) + " 天"}</td></tr>`;
+  }).join("");
+}
+function calc() {
+  const v = document.getElementById("target").value, out = document.getElementById("out");
+  const name = document.getElementById("name").value.trim() || "目標日";
+  if (!v) { out.textContent = "請選擇目標日期"; return; }
+  const t = todayDate(), d = parse(v), k = diffDays(t, d);
+  const safe = name.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const head = k > 0 ? `距離${safe}還有 ${fmt(k)} 天` : k === 0 ? `${safe}就是今天！` : `${safe}已經過了 ${fmt(-k)} 天`;
+  out.innerHTML = `<div class="big">${head}</div><dl>
+    <dt>目標日期</dt><dd>${iso(d)}（星期${wk[d.getDay()]}）</dd>
+    <dt>約</dt><dd>${fmt(Math.trunc(Math.abs(k) / 7))} 週 ${Math.abs(k) % 7} 天</dd>
+    <dt>約</dt><dd>${fmt(Math.abs(k) * 24)} 小時</dd></dl>`;
+}
+(() => { const t = todayDate(); document.getElementById("target").value = iso(ymd(t.getFullYear(), 12, 31)); })();
+renderList();
+bindAll(calc);
+</script>

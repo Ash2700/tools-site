@@ -1,0 +1,51 @@
+<!--meta
+{"title": "長度換算（公分／台尺／吋／英尺）", "description": "公分、公尺、台尺、台寸、吋、英尺、碼、英里互相換算，量家具、看螢幕尺寸、買褲子腰圍都能快速對照。", "category": "換算", "order": 33}
+-->
+<div class="panel">
+  <div class="row">
+    <div><label for="cm">公分（cm）</label><input id="cm" type="number" inputmode="decimal" value="100"></div>
+    <div><label for="mm">公釐（mm）</label><input id="mm" type="number" inputmode="decimal"></div>
+  </div>
+  <div class="row">
+    <div><label for="m">公尺（m）</label><input id="m" type="number" inputmode="decimal"></div>
+    <div><label for="km">公里（km）</label><input id="km" type="number" inputmode="decimal"></div>
+  </div>
+  <div class="row">
+    <div><label for="chi">台尺</label><input id="chi" type="number" inputmode="decimal"></div>
+    <div><label for="cun">台寸</label><input id="cun" type="number" inputmode="decimal"></div>
+  </div>
+  <div class="row">
+    <div><label for="inch">吋（inch）</label><input id="inch" type="number" inputmode="decimal"></div>
+    <div><label for="ft">英尺（ft）</label><input id="ft" type="number" inputmode="decimal"></div>
+  </div>
+  <div class="row">
+    <div><label for="yd">碼（yd）</label><input id="yd" type="number" inputmode="decimal"></div>
+    <div><label for="mi">英里（mile）</label><input id="mi" type="number" inputmode="decimal"></div>
+  </div>
+  <div class="result" id="out"></div>
+</div>
+<section class="explain">
+  <h2>換算基準</h2>
+  <p>1 台尺 ＝ 10/33 公尺 ≈ 30.303 公分，1 台尺 ＝ 10 台寸，1 台寸 ≈ 3.0303 公分（台灣木工、裝潢、量窗簾常用的「台尺」即此單位）。</p>
+  <p>英制採國際定義：1 吋 ＝ 2.54 公分，1 英尺 ＝ 12 吋 ＝ 30.48 公分，1 碼 ＝ 3 英尺 ＝ 91.44 公分，1 英里 ＝ 1,609.344 公尺。</p>
+  <p>常見用途：電視、手機螢幕的「吋」是對角線長度；牛仔褲腰圍 30 吋 ≈ 76.2 公分；身高 5 呎 7 吋 ≈ 170.2 公分。在任一欄輸入，其他欄會自動換算。</p>
+</section>
+<script>
+const toCm = { cm: 1, mm: 0.1, m: 100, km: 100000, chi: 1000 / 33, cun: 100 / 33, inch: 2.54, ft: 30.48, yd: 91.44, mi: 160934.4 };
+const ids = Object.keys(toCm);
+function from(src) {
+  const v = parseFloat(document.getElementById(src).value);
+  ids.forEach((id) => {
+    if (id !== src) document.getElementById(id).value = Number.isFinite(v) ? +(v * toCm[src] / toCm[id]).toPrecision(8) : "";
+  });
+  const out = document.getElementById("out");
+  if (!Number.isFinite(v)) { out.textContent = "請輸入數字"; return; }
+  const cm = v * toCm[src];
+  const totalIn = cm / 2.54, ft = Math.floor(totalIn / 12), inch = totalIn - ft * 12;
+  out.innerHTML = `<div class="big">${fmt(cm, 2)} 公分</div><dl>
+    <dt>英制寫法</dt><dd>${fmt(ft)} 呎 ${fmt(inch, 2)} 吋</dd>
+    <dt>台制寫法</dt><dd>${fmt(cm * 33 / 1000, 3)} 台尺</dd></dl>`;
+}
+ids.forEach((id) => document.getElementById(id).addEventListener("input", () => from(id)));
+from("cm");
+</script>
