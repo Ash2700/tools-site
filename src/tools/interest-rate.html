@@ -1,0 +1,39 @@
+<!--meta
+{"title": "利率換算（年利率・月利率・日利率）", "description": "年利率、月利率、日利率互相換算，同時算出有效年利率與每萬元每日、每月利息，比較貸款或借款成本。", "category": "理財", "order": 30}
+-->
+<div class="panel">
+  <div class="row">
+    <div><label for="v">利率（%）</label><input id="v" type="number" inputmode="decimal" value="2" step="0.01" min="0"></div>
+    <div><label for="unit">這是</label>
+      <select id="unit"><option value="y">年利率</option><option value="m">月利率</option><option value="d">日利率</option></select></div>
+  </div>
+  <div class="row">
+    <div><label for="days">一年以幾天計</label>
+      <select id="days"><option value="365">365 天</option><option value="360">360 天</option></select></div>
+    <div><label for="p">本金（元，選填）</label><input id="p" type="number" inputmode="decimal" value="100000" min="0"></div>
+  </div>
+  <div class="result" id="out"></div>
+</div>
+<section class="explain">
+  <h2>怎麼算的？</h2>
+  <p>名目利率換算為單利比例關係：年利率 = 月利率 × 12 = 日利率 × 365（部分金融商品以 360 天計）。例如年利率 2%，月利率約 0.1667%，日利率約 0.00548%。</p>
+  <p>「有效年利率」考慮了利滾利：若按月複利，有效年利率 = (1 + 月利率)<sup>12</sup> − 1；按日複利則為 (1 + 日利率)<sup>365</sup> − 1。同樣的名目利率，複利次數越多，實際負擔越高。</p>
+  <p>民間借貸常說的「日息」「月息」，可用本工具換回年利率比較。依《民法》第 205 條，約定利率超過週年 16% 者，超過部分之約定無效。</p>
+</section>
+<script>
+function calc() {
+  const v = num("v") / 100, unit = document.getElementById("unit").value, N = +document.getElementById("days").value;
+  const P = num("p"), out = document.getElementById("out");
+  if (!(v >= 0)) { out.textContent = "請輸入有效利率"; return; }
+  const y = unit === "y" ? v : unit === "m" ? v * 12 : v * N, m = y / 12, d = y / N;
+  const pct = (x, k) => fmt(x * 100, k) + "%";
+  const effM = Math.pow(1 + m, 12) - 1, effD = Math.pow(1 + d, N) - 1;
+  let money = `<dt>每萬元每日利息</dt><dd>${fmt(10000 * d, 2)} 元</dd><dt>每萬元每月利息</dt><dd>${fmt(10000 * m, 2)} 元</dd>`;
+  if (P > 0) money += `<dt>本金 ${fmt(P)} 元一年利息（單利）</dt><dd>${fmt(P * y)} 元</dd><dt>每月利息</dt><dd>${fmt(P * m)} 元</dd>`;
+  out.innerHTML = `<div class="big">年利率 ${pct(y, 4)}</div><dl>
+    <dt>月利率</dt><dd>${pct(m, 4)}</dd><dt>日利率</dt><dd>${pct(d, 5)}</dd>
+    <dt>有效年利率（按月複利）</dt><dd>${pct(effM, 4)}</dd><dt>有效年利率（按日複利）</dt><dd>${pct(effD, 4)}</dd>
+    ${money}</dl>${y > 0.16 ? '<p style="color:#c0392b">注意：年利率超過 16%，超過部分依民法第 205 條約定無效。</p>' : ""}`;
+}
+bindAll(calc);
+</script>

@@ -1,0 +1,55 @@
+<!--meta
+{"title": "預產期計算", "description": "輸入最後一次月經第一天（或受孕日），推算預產期、目前懷孕幾週幾天、所在孕期與重要產檢時間點。", "category": "健康", "order": 72}
+-->
+<div class="panel">
+  <div class="row">
+    <div><label for="mode">推算依據</label>
+      <select id="mode"><option value="lmp">最後一次月經第一天</option><option value="conc">受孕日（排卵日）</option></select></div>
+    <div><label for="d">日期</label><input id="d" type="date"></div>
+  </div>
+  <div class="row">
+    <div><label for="cycle">平均月經週期（天）</label><input id="cycle" type="number" inputmode="numeric" value="28" min="20" max="45"></div>
+    <div><label for="today">以哪天計算孕週</label><input id="today" type="date"></div>
+  </div>
+  <div class="result" id="out"></div>
+</div>
+<section class="explain">
+  <h2>怎麼算的？</h2>
+  <p>採用產科常用的「內格萊氏法則」（Naegele's rule）：預產期 = 最後一次月經第一天 + 280 天（40 週）。這個公式假設月經週期為 28 天、第 14 天排卵；若週期較長或較短，預產期就加減（週期 − 28）天。若以受孕日推算，預產期 = 受孕日 + 266 天（38 週）。</p>
+  <p>懷孕週數從最後一次月經第一天算起：第 1–13 週為第一孕期、第 14–27 週為第二孕期、第 28 週起為第三孕期；滿 37 週為足月。</p>
+  <p>實際上只有約 4–5% 的寶寶在預產期當天出生，多數在前後兩週內。本工具僅供參考，請以醫師超音波評估為準。</p>
+</section>
+<script>
+const DAY = 86400000, wk = "日一二三四五六";
+const parse = (id) => { const v = document.getElementById(id).value; return v ? new Date(v + "T00:00:00") : null; };
+const add = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const show = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}（民國 ${d.getFullYear() - 1911} 年，星期${wk[d.getDay()]}）`;
+function calc() {
+  const mode = document.getElementById("mode").value, d = parse("d"), t = parse("today");
+  const cyc = Math.round(num("cycle")), out = document.getElementById("out");
+  document.getElementById("cycle").disabled = mode === "conc";
+  if (!d || (mode === "lmp" && !(cyc >= 20 && cyc <= 45))) { out.textContent = "請選擇日期，週期請填 20–45 天"; return; }
+  // Normalise to an equivalent LMP for a 28-day cycle.
+  const lmp = mode === "lmp" ? add(d, cyc - 28) : add(d, -14);
+  const due = add(lmp, 280);
+  let ga = "";
+  if (t) {
+    const days = Math.round((t - lmp) / DAY);
+    if (days < 0) ga = `<dt>目前孕週</dt><dd>尚未懷孕（日期早於推算的月經起始日）</dd>`;
+    else {
+      const w = Math.floor(days / 7), tri = w < 14 ? "第一孕期" : w < 28 ? "第二孕期" : "第三孕期";
+      const left = Math.round((due - t) / DAY);
+      ga = `<dt>目前孕週</dt><dd>${w} 週 ${days % 7} 天（${tri}${w >= 37 ? "，已足月" : ""}）</dd>
+        <dt>距預產期</dt><dd>${left >= 0 ? `還有 ${fmt(left)} 天` : `已超過 ${fmt(-left)} 天`}</dd>`;
+    }
+  }
+  const ms = [["第一孕期結束（滿 13 週 6 天）", 97], ["第二孕期結束（滿 27 週 6 天）", 195], ["足月（滿 37 週）", 259], ["滿 42 週（過期妊娠）", 294]];
+  out.innerHTML = `<div class="big">預產期：${show(due)}</div><dl>${ga}
+    ${ms.map(([k, n]) => `<dt>${k}</dt><dd>${show(add(lmp, n))}</dd>`).join("")}</dl>`;
+}
+const iso = (x) => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+const now = new Date();
+document.getElementById("today").value = iso(now);
+document.getElementById("d").value = iso(add(now, -60));
+bindAll(calc);
+</script>

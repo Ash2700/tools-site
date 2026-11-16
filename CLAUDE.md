@@ -20,8 +20,6 @@ Live at https://ash2700.github.io/tools-site/ — deployed by `.github/workflows
 - Do not touch `src/static/google*.html` (Search Console verification).
 
 ## Tool backlog (pick from the top, remove when done)
-- 預產期計算
-- 利率換算（年利率↔月利率↔日利率）
 - 隨機抽籤／分組工具
 - 字數計算（中英文字數、字元數）
 - 單價比較（不同容量哪個划算）
@@ -32,3 +30,5 @@ Live at https://ash2700.github.io/tools-site/ — deployed by `.github/workflows
 - 羅馬數字轉換（阿拉伯數字↔羅馬數字）
 - 速度換算（公里/時、英里/時、公尺/秒、節）
 - 鞋子尺碼換算（台灣/日本公分、美國、歐洲尺碼對照）
+- 定存利息試算（整存整付／存本取息，單利與複利）
+- 油耗換算（公里/公升 ↔ 公升/百公里 ↔ 英里/加侖）
