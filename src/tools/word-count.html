@@ -1,0 +1,48 @@
+<!--meta
+{"title": "字數計算", "description": "貼上文章即時統計中文字數、英文單字數、數字、標點與總字元數（含／不含空白），寫作業、投稿、社群貼文字數限制一次掌握。", "category": "日常", "order": 67}
+-->
+<style>
+textarea { width: 100%; min-height: 200px; font: inherit; padding: 10px 12px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--bg); color: var(--fg); resize: vertical; }
+</style>
+<div class="panel">
+  <label for="text">貼上或輸入文字</label>
+  <textarea id="text">今天天氣很好，我們去 Taipei 101 看夜景。
+The view was amazing!
+
+明天要交 3 篇報告。</textarea>
+  <div class="result" id="out"></div>
+</div>
+<section class="explain">
+  <h2>字數是怎麼算的？</h2>
+  <p><b>中文字數：</b>計算漢字（含繁簡中文、日文漢字）的個數，每個字算 1 字，不含標點。</p>
+  <p><b>英文單字數：</b>連續的英文字母（可含撇號 ' 與連字號 -，如 don't、e-mail）算 1 個單字。</p>
+  <p><b>數字：</b>連續的阿拉伯數字（可含小數點、千分位逗號）算 1 組，例如「101」、「3.14」各算 1 組。</p>
+  <p><b>總字數（常見算法）：</b>中文字數 ＋ 英文單字數 ＋ 數字組數，這是多數學校作業、投稿系統與 Microsoft Word「字數」的計算方式。</p>
+  <p><b>字元數：</b>每一個字、字母、數字、標點、空白都算 1 個字元；「不含空白」則排除空格、Tab 與換行。表情符號等特殊字元也只算 1 個。</p>
+  <p>所有統計都在你的瀏覽器中完成，文字不會上傳。</p>
+</section>
+<script>
+function count() {
+  const t = document.getElementById("text").value;
+  const chars = Array.from(t);
+  const han = (t.match(/\p{Script=Han}/gu) || []).length;
+  const words = (t.match(/[A-Za-z]+(?:['’\-][A-Za-z]+)*/g) || []).length;
+  const nums = (t.match(/\d+(?:[.,]\d+)*/g) || []).length;
+  const punct = (t.match(/[\p{P}\p{S}]/gu) || []).length;
+  const noSpace = chars.filter((c) => !/\s/.test(c)).length;
+  const lines = t === "" ? 0 : t.split(/\r?\n/).length;
+  const paras = t.split(/\r?\n\s*\r?\n|\r?\n/).filter((p) => p.trim()).length;
+  document.getElementById("out").innerHTML = `<div class="big">${fmt(han + words + nums)} 字</div>
+    <dl><dt>中文字數</dt><dd id="han">${fmt(han)}</dd>
+    <dt>英文單字數</dt><dd id="words">${fmt(words)}</dd>
+    <dt>數字（組）</dt><dd id="nums">${fmt(nums)}</dd>
+    <dt>標點與符號</dt><dd id="punct">${fmt(punct)}</dd>
+    <dt>字元數（含空白）</dt><dd id="chars">${fmt(chars.length)}</dd>
+    <dt>字元數（不含空白）</dt><dd id="nospace">${fmt(noSpace)}</dd>
+    <dt>行數</dt><dd>${fmt(lines)}</dd>
+    <dt>段落數（非空白行）</dt><dd id="paras">${fmt(paras)}</dd></dl>`;
+}
+document.getElementById("text").addEventListener("input", count);
+count();
+</script>

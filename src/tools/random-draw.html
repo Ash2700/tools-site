@@ -1,0 +1,82 @@
+<!--meta
+{"title": "隨機抽籤／分組工具", "description": "輸入名單即可公平隨機抽出中獎者，或把成員平均分成幾組，尾牙抽獎、課堂分組、輪值排班都適用。", "category": "日常", "order": 66}
+-->
+<style>
+textarea { width: 100%; min-height: 160px; font: inherit; padding: 10px 12px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--bg); color: var(--fg); resize: vertical; }
+.btn { margin-top: 14px; width: 100%; font: inherit; font-weight: 700; padding: 12px; border: 0; border-radius: 8px;
+  background: var(--accent); color: var(--card); cursor: pointer; }
+.result ol { margin: 8px 0 0; padding-left: 1.6em; }
+.result h3 { margin: 12px 0 4px; font-size: 1rem; }
+</style>
+<div class="panel">
+  <label for="names">名單（每行一個，或用逗號、頓號分隔）</label>
+  <textarea id="names">王小明
+陳美玲
+林志豪
+張雅婷
+李家豪
+黃怡君
+吳建宏
+劉淑芬
+蔡宗翰
+鄭佳穎</textarea>
+  <div class="row">
+    <div><label for="mode">模式</label>
+      <select id="mode"><option value="draw">抽出中獎者</option><option value="group">平均分組</option></select></div>
+    <div><label for="count" id="countLabel">抽出人數</label><input id="count" type="number" inputmode="numeric" min="1" value="3"></div>
+  </div>
+  <label><input id="dedupe" type="checkbox" checked style="width:auto;margin-right:6px">移除重複的名字</label>
+  <button class="btn" id="go" type="button">開始抽籤</button>
+  <div class="result" id="out">按下「開始抽籤」產生結果</div>
+</div>
+<section class="explain">
+  <h2>抽籤是怎麼做到公平的？</h2>
+  <p>本工具使用瀏覽器內建的密碼學亂數產生器（<code>crypto.getRandomValues</code>），搭配 Fisher–Yates 洗牌演算法：從名單最後一位開始，每次與前面任一位（含自己）隨機交換位置，完成後每一種排列出現的機率完全相同，共 n! 種可能。</p>
+  <p><b>抽出中獎者：</b>洗牌後取前 N 位，每個人中獎的機率都是 N ÷ 總人數。例如 10 人抽 3 位，每人中獎機率 30%。</p>
+  <p><b>平均分組：</b>洗牌後依序輪流分配到第 1、2、3…組，各組人數最多只差 1 人。例如 10 人分 3 組，會是 4、3、3 人。</p>
+  <p>所有運算都在你的瀏覽器中完成，名單不會上傳到任何伺服器。</p>
+</section>
+<script>
+function parseNames() {
+  let list = document.getElementById("names").value.split(/[\n,，、;；]+/).map((s) => s.trim()).filter(Boolean);
+  if (document.getElementById("dedupe").checked) list = [...new Set(list)];
+  return list;
+}
+function randInt(max) { // uniform 0..max-1
+  const lim = Math.floor(0x100000000 / max) * max, a = new Uint32Array(1);
+  do { crypto.getRandomValues(a); } while (a[0] >= lim);
+  return a[0] % max;
+}
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = randInt(i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function syncLabel() {
+  const g = document.getElementById("mode").value === "group";
+  document.getElementById("countLabel").textContent = g ? "分成幾組" : "抽出人數";
+  document.getElementById("go").textContent = g ? "開始分組" : "開始抽籤";
+}
+function run() {
+  const list = parseNames(), n = Math.floor(num("count")), out = document.getElementById("out");
+  const g = document.getElementById("mode").value === "group";
+  if (list.length === 0) { out.innerHTML = "請先輸入名單"; return; }
+  if (!(n >= 1)) { out.innerHTML = g ? "組數至少為 1" : "抽出人數至少為 1"; return; }
+  if (n > list.length) { out.innerHTML = `名單只有 ${list.length} 人，${g ? "組數" : "抽出人數"}不能超過人數`; return; }
+  const s = shuffle(list);
+  if (!g) {
+    out.innerHTML = `<div class="big">抽出 ${n} 位</div><ol id="winners">${s.slice(0, n).map((x) => `<li>${esc(x)}</li>`).join("")}</ol>
+      <dl><dt>名單總人數</dt><dd>${list.length} 人</dd><dt>每人中獎機率</dt><dd>${fmt(n / list.length * 100, 1)}%</dd></dl>`;
+  } else {
+    const groups = Array.from({ length: n }, () => []);
+    s.forEach((x, i) => groups[i % n].push(x));
+    out.innerHTML = `<div class="big">${list.length} 人分成 ${n} 組</div>` +
+      groups.map((gr, i) => `<h3>第 ${i + 1} 組（${gr.length} 人）</h3><ol class="grp">${gr.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>`).join("");
+  }
+}
+document.getElementById("go").addEventListener("click", run);
+document.getElementById("mode").addEventListener("change", syncLabel);
+syncLabel();
+</script>

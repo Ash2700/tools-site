@@ -20,8 +20,6 @@ Live at https://ash2700.github.io/tools-site/ — deployed by `.github/workflows
 - Do not touch `src/static/google*.html` (Search Console verification).
 
 ## Tool backlog (pick from the top, remove when done)
-- 隨機抽籤／分組工具
-- 字數計算（中英文字數、字元數）
 - 單價比較（不同容量哪個划算）
 - 貸款提前還款試算
 - 機車/汽車燃料稅與牌照稅計算（需查證當年度官方稅額表）
@@ -32,3 +30,5 @@ Live at https://ash2700.github.io/tools-site/ — deployed by `.github/workflows
 - 鞋子尺碼換算（台灣/日本公分、美國、歐洲尺碼對照）
 - 定存利息試算（整存整付／存本取息，單利與複利）
 - 油耗換算（公里/公升 ↔ 公升/百公里 ↔ 英里/加侖）
+- 面積換算（平方公尺/坪/公頃/甲/分/平方英尺）
+- 百分比計算機（A 是 B 的幾 %、加減成數、反推原價）
